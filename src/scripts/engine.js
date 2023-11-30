@@ -56,33 +56,53 @@ async function getRandomCardId() {
   return cardData[randomIndex].id;
 }
 
-async function createCardImage(IdCard, fieldSide) {
-  const cardImage = document.createElement("img");
+async function setCardAttributes(cardImage, IdCard) {
   cardImage.setAttribute("height", "100px");
   cardImage.setAttribute("src", "./src/assets/icons/card-back.png");
   cardImage.setAttribute("data-id", IdCard);
   cardImage.classList.add("card");
+}
+
+async function setEventMouseOver(cardImage, IdCard) {
+  cardImage.addEventListener("mouseover", () => {
+    drawSelectCard(IdCard);
+  });
+}
+
+async function setEventMouseClick(cardImage) {
+  cardImage.addEventListener("click", () => {
+    setCardsField(cardImage.getAttribute("data-id"));
+  });
+}
+
+async function createCardImage(IdCard, fieldSide) {
+  const cardImage = document.createElement("img");
+
+  await setCardAttributes(cardImage, IdCard);
 
   if (fieldSide === state.playerSides.player1) {
-    cardImage.addEventListener("mouseover", () => {
-      drawSelectCard(IdCard);
-    });
-
-    cardImage.addEventListener("click", () => {
-      setCardsField(cardImage.getAttribute("data-id"));
-    });
+    await setEventMouseOver(cardImage, IdCard);
+    await setEventMouseClick(cardImage);
   }
 
   return cardImage;
 }
 
-async function removeAllCardsImages() {
-  state.playerSides.computerBox
-    .querySelectorAll("img")
-    .forEach((img) => img.remove());
+async function removePlayerCardsImages() {
   state.playerSides.player1Box
     .querySelectorAll("img")
     .forEach((img) => img.remove());
+}
+
+async function removeComputerCardsImages() {
+  state.playerSides.computerBox
+    .querySelectorAll("img")
+    .forEach((img) => img.remove());
+}
+
+async function removeAllCardsImages() {
+  await removeComputerCardsImages();
+  await removePlayerCardsImages();
 }
 
 async function checkDuelResults(playerCardId, computerCardId) {
@@ -104,8 +124,7 @@ async function checkDuelResults(playerCardId, computerCardId) {
 async function resetDuel() {
   state.button.style.display = "none";
 
-  state.fieldCards.player.style.display = "none";
-  state.fieldCards.computer.style.display = "none";
+  await showHiddenCardFieldsImages(false);
   main();
 }
 
